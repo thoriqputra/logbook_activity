@@ -1,0 +1,52 @@
+version: "3.7"
+services:
+  app:
+    build:
+      args:
+        user: thoriq
+        uid: 1000
+      context: ./
+      dockerfile: Dockerfile
+    image: logbook
+    container_name: logbook-app
+    restart: unless-stopped
+    working_dir: /var/www/
+    volumes:
+      - ./:/var/www
+    networks:
+      - logbook
+
+  nginx:
+    image: nginx:alpine
+    container_name: logbook-nginx
+    restart: unless-stopped
+    ports:
+      - 8001:80
+      - 443:443
+    volumes:
+      - ./:/var/www
+      - ./docker-compose/nginx:/etc/nginx/conf.d/
+    networks:
+      - logbook
+
+  # redis:
+  #   image: redis:latest
+  #   container_name: redis
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "ping"]
+  #     interval: 5s
+  #     timeout: 30s
+  #     retries: 50
+  #   restart: unless-stopped
+  #   command: redis-server --appendonly yes
+  #   volumes:
+  #     - ./:/var/www
+  #     - ./docker-compose/redis:/etc/redis/data/
+  #   ports:
+  #     - 6379
+  #   networks:
+  #     - logbook
+
+networks:
+  logbook:
+    driver: bridge
